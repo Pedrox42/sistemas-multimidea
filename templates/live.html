@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Live Stream</title>
+    <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
+    <style>
+        /* Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0f0f0f;
+            color: #f5f5f5;
+            font-family: "Segoe UI", Roboto, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+            padding: 0;
+        }
+
+        /* Navbar */
+        header {
+            width: 100%;
+            background: #1a1a1a;
+            padding: 15px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.5);
+        }
+
+        header h1 {
+            font-size: 1.4rem;
+            font-weight: 500;
+            color: #f5f5f5;
+            letter-spacing: 1px;
+        }
+
+        main {
+            margin-top: 90px; /* espaço para a navbar */
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        video {
+            width: 85%;
+            max-width: 960px;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+            outline: none;
+        }
+
+        footer {
+            margin: 25px 0;
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🔴 Transmissão ao Vivo</h1>
+    </header>
+
+    <main>
+        <div id="videoContainer">
+            <video id="videoPlayer" class="dashjs-player" style="position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%);" controls="false" autoplay playsinline></video>
+            <div id="customMessage" style="position: absolute; top: 65%; left: 50%; transform: translate(-50%, -50%); background-color: rgba(0, 0, 0, 0.7); color: white; padding: 10px; display: none;"></div>
+        </div>
+    </main>
+
+    <footer style="position: absolute; top: 70%">
+        <p>®2025 Anna Letícia, Davi Esteves e Pedro Lima</p>
+    </footer>
+
+    <script>
+        var url = '/live/app/live-manifest.mpd';
+        var player = dashjs.MediaPlayer().create();
+        player.initialize(document.querySelector("#videoPlayer"), url, true);
+        customEventHandler = function (payload) {
+            console.log(payload.event.messageData)
+            showCustomMessage(payload.event.messageData);
+        };
+        var CUSTOM_EVENT_SCHEME = 'urn:metadata';
+        player.on(CUSTOM_EVENT_SCHEME, this.customEventHandler.bind(this));
+        // Assuming 'player' is your dash.js player instance
+        const customMessageElement = document.getElementById('customMessage');
+
+        // Function to show a custom message
+        function showCustomMessage(message) {
+            customMessageElement.textContent = message;
+            customMessageElement.style.display = 'block';
+        }        // Keep live mode
+
+        player.updateSettings({
+            streaming: {
+                delay: { liveDelayFragmentCount: 2 }
+            }
+        });
+
+        // Poll to detect stream end
+        var sourceAlive = true;
+        function checkStreamEnd() {
+            fetch('/stream_alive')
+                .then(res => res.json())
+                .then(data => {
+                    sourceAlive = data.alive;
+                    if (!sourceAlive) {
+                        console.log("Live stream ended. Playing remaining video...");
+                        var currentTime = player.time();
+                        player.reset();
+                        player.initialize(document.querySelector("#videoPlayer"), url, true);
+                        player.seek(currentTime);
+                        player.updateSettings({
+                            streaming: { delay: { liveDelayFragmentCount: 0 } }
+                        });
+                        player.play();
+                    }
+                })
+                .catch(console.error)
+                .finally(() => {
+                    if (sourceAlive) setTimeout(checkStreamEnd, 500);
+                });
+        }
+        checkStreamEnd();
+
+        // Listen to EMSG events from DASH (metadata events)
+        player.on(dashjs.MediaPlayer.events.EMSG, function(e) {
+            console.log("[EMSG Event]", e);
+            // You can display e.message or e.id here if desired
+        });
+    </script>
+</body>
+</html>
