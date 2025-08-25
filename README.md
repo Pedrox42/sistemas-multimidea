@@ -1,3 +1,22 @@
+# Servidor DASH com suporte a Metadados para eventos em uma live stream
+
+## Funcionamento do Projeto
+
+Este sistema implementa um servidor que:
+
+* Recebe um fluxo RTMP,
+* Disponibiliza a live via HTTP usando DASH,
+* Suporta injeção de metadados,
+* Atualiza o manifesto DASH (`live-manifest.mpd`) com esses metadados.
+
+Autores:
+
+1. Anna Letícia Franco Monteiro
+2. Davi Esteves dos Santos
+3. Pedro Campos Lima
+
+---
+
 # Instruções para Configuração do Ambiente Python
 
 ## Configuração do Ambiente Virtual e Instalação de Dependências
@@ -29,15 +48,6 @@
 
 - **`python3 client.py`**  
   Inicia a transmissão de um vídeo para o servidor
-
-## Funcionamento do Projeto
-
-Este sistema implementa um servidor que:
-
-* Recebe um fluxo RTMP,
-* Disponibiliza a live via HTTP usando DASH,
-* Suporta injeção de metadados,
-* Atualiza o manifesto DASH (`live-manifest.mpd`) com esses metadados.
 
 ---
 # server.py
@@ -200,13 +210,6 @@ Este sistema implementa um servidor que:
 
 # client.py
 
-Este script implementa um cliente que:
-
-* Envia um vídeo local via RTMP para o servidor (`rtmp://localhost:1935/live/app`),
-* Envia metadados para o server.py,
-
----
-
 ## Funções
 
 ### `run_ffmpeg(cmd, name)`
@@ -263,6 +266,6 @@ Este script implementa um cliente que:
 
   * Chama `run_ffmpeg(FFMPEG_PUSH, "Push")`.
   * Inicia transmissão do vídeo para RTMP.
-  * Simultaneamente, inicia envio periódico de metadados para o servidor Flask.
+  * Simultaneamente, inicia envio periódico de metadados para o servidor.
 
 ---
