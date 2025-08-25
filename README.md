@@ -245,7 +245,7 @@ Este script implementa um cliente que:
        ```json
        {
          "metadata": "message N",
-         "time": N
+         "time": "N"
        }
        ```
      * Aguarda 0.5s antes do próximo envio.
