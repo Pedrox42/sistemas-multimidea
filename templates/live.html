@@ -47,7 +47,7 @@
         }
 
         main {
-            margin-top: 90px; /* espaço para a navbar */
+            margin-top: 90px;
             width: 100%;
             display: flex;
             flex-direction: column;
@@ -94,15 +94,13 @@
             showCustomMessage(payload.event.messageData);
         };
         var CUSTOM_EVENT_SCHEME = 'urn:metadata';
-        player.on(CUSTOM_EVENT_SCHEME, this.customEventHandler.bind(this));
-        // Assuming 'player' is your dash.js player instance
+        player.on(CUSTOM_EVENT_SCHEME, customEventHandler.bind());
         const customMessageElement = document.getElementById('customMessage');
 
-        // Function to show a custom message
         function showCustomMessage(message) {
             customMessageElement.textContent = message;
             customMessageElement.style.display = 'block';
-        }        // Keep live mode
+        }
 
         player.updateSettings({
             streaming: {
@@ -110,7 +108,6 @@
             }
         });
 
-        // Poll to detect stream end
         var sourceAlive = true;
         function checkStreamEnd() {
             fetch('/stream_alive')
@@ -135,12 +132,6 @@
                 });
         }
         checkStreamEnd();
-
-        // Listen to EMSG events from DASH (metadata events)
-        player.on(dashjs.MediaPlayer.events.EMSG, function(e) {
-            console.log("[EMSG Event]", e);
-            // You can display e.message or e.id here if desired
-        });
     </script>
 </body>
 </html>

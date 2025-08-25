@@ -1,1 +1,4 @@
 videos/*.mp4
+live/app/*.mpd
+live/app/*.m4s
+live/app/*.tmp
