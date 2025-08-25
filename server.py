@@ -2,6 +2,8 @@ import os
 import subprocess
 import threading
 import time
+from pathlib import Path
+
 from flask import Flask, send_from_directory, jsonify, request, render_template
 import xml.etree.ElementTree as ET
 
@@ -49,8 +51,22 @@ def metadata_feed():
 def watch_page():
     return render_template("live.html")
 
+def clean(path):
+    dir_path = Path(path)
+    if not dir_path.is_dir():
+        raise NotADirectoryError(f"{path}: directory not found")
+
+    for item in dir_path.iterdir():
+        if item.name == ".gitkeep":
+            continue
+        if item.is_file():
+            item.unlink()
+
 def run_ffmpeg(cmd, name):
     global ffmpeg_dash_proc
+
+    clean("live/app")
+
     try:
         print(f"[FFmpeg-{name}] Starting: {' '.join(cmd)}")
         proc = subprocess.Popen(cmd)
